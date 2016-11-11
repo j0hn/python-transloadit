@@ -21,15 +21,27 @@ class Client(object):
         return hmac.new(self.secret, json.dumps(params),
             hashlib.sha1).hexdigest()
 
-    def request(self, files=None, **params):
+    def get_auth(self):
+        return {
+            'key': self.key,
+            'expires': (datetime.now() +
+                timedelta(days=1)).strftime('%Y/%m/%d %H:%M:%S')
+        }
+
+    def post(self, files=None, **params):
         if 'auth' not in params:
-            params['auth'] = {
-                'key': self.key,
-                'expires': (datetime.now() +
-                    timedelta(days=1)).strftime('%Y/%m/%d %H:%M:%S')
-            }
+            params['auth'] = self.get_auth()
 
         response = requests.post(ASSEMBLY_API_URL, data={'params': json.dumps(params),
             'signature': self._sign_request(params)}, files=files)
+
+        return response.json()
+
+    def get(self, files=None, **params):
+        if 'auth' not in params:
+            params['auth'] = self.get_auth()
+
+        response = requests.get(ASSEMBLY_API_URL, params={'params': json.dumps(params),
+            'signature': self._sign_request(params)})
 
         return response.json()
