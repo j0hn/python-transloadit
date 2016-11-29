@@ -28,14 +28,18 @@ class Client(object):
                 timedelta(days=1)).strftime('%Y/%m/%d %H:%M:%S')
         }
 
-    def post(self, files=None, **params):
+    def post(self, path="", files=None, **params):
+        url = "{}{}".format(ASSEMBLY_API_URL, path)
+
         if 'auth' not in params:
             params['auth'] = self.get_auth()
 
-        response = requests.post(ASSEMBLY_API_URL, data={'params': json.dumps(params),
-            'signature': self._sign_request(params)}, files=files)
+        response = requests.post(url, data={
+            'params': json.dumps(params),
+            'signature': self._sign_request(params)
+        }, files=files)
 
-        return response.json()
+        return response
 
     def get(self, files=None, **params):
         if 'auth' not in params:
@@ -44,4 +48,9 @@ class Client(object):
         response = requests.get(ASSEMBLY_API_URL, params={'params': json.dumps(params),
             'signature': self._sign_request(params)})
 
+        return response.json()
+
+    def reply(self, video_id):
+        path = "/{}/reply".format(video_id)
+        response = self.post(path)
         return response.json()
