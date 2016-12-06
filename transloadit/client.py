@@ -50,7 +50,7 @@ class Client(object):
 
         return response.json()
 
-    def reply(self, video_id):
-        path = "/{}/reply".format(video_id)
+    def replay(self, video_id):
+        path = "/{}/replay".format(video_id)
         response = self.post(path)
         return response.json()
